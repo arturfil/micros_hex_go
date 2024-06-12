@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+    "fmt"
 
 	pb "github.com/arturfil/m_commons/api"
 	"google.golang.org/grpc"
@@ -18,6 +19,8 @@ func NewGRPCHandler(grpcServer *grpc.Server) {
 }
 
 func (h *grpcHandler) CreateOrder(ctx context.Context, p *pb.CreateOrderRequest) (*pb.Order, error) {
+    return nil, fmt.Errorf("this is an error")
+
     log.Println("New order recieved! Order %v", p)
     o := &pb.Order{
         ID: "42",
