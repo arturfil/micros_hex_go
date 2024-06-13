@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/joho/godotenv/autoload"
 	common "github.com/arturfil/m_commons"
-    pb "github.com/arturfil/m_commons/api"
+	pb "github.com/arturfil/m_commons/api"
+	"github.com/go-chi/chi/v5"
+	_ "github.com/joho/godotenv/autoload"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -28,7 +29,7 @@ func main() {
 
     c := pb.NewOrderServiceClient(conn)
 
-    mux := http.NewServeMux()
+    mux := chi.NewMux()
     handler := NewHandler(c)
     handler.registerRoutes(mux)
 
