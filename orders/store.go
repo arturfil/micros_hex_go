@@ -3,13 +3,13 @@ package main
 import "context"
 
 type store struct {
-    // add mongodb here
+	// add mongodb here
 }
 
 func NewStore() *store {
-    return &store{}
+	return &store{}
 }
 
 func (s *store) Create(context.Context) error {
-    return nil
+	return nil
 }

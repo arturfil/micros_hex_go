@@ -57,24 +57,24 @@ func (r *Registry) Register(ctx context.Context, instanceID, serviceName, hostPo
 }
 
 func (r *Registry) DeRegister(ctx context.Context, instanceID, serviceName string) error {
-    log.Printf("Deregistering servier %s", instanceID)
-    return r.client.Agent().CheckDeregister(instanceID)
+	log.Printf("Deregistering servier %s", instanceID)
+	return r.client.Agent().CheckDeregister(instanceID)
 }
 
 func (r *Registry) Discover(ctx context.Context, serviceName string) ([]string, error) {
-    entries, _, err := r.client.Health().Service(serviceName, "", true, nil)
-    if err != nil {
-        return nil, err
-    }
+	entries, _, err := r.client.Health().Service(serviceName, "", true, nil)
+	if err != nil {
+		return nil, err
+	}
 
-    var instances []string
-    for _, entry := range entries {
-        instances = append(instances, fmt.Sprintf("%s:%d", entry.Service.Address, entry.Service.Port))
-    }
+	var instances []string
+	for _, entry := range entries {
+		instances = append(instances, fmt.Sprintf("%s:%d", entry.Service.Address, entry.Service.Port))
+	}
 
-    return instances, nil
+	return instances, nil
 }
 
 func (r *Registry) HealthCheck(instanceID, serviceName string) error {
-    return r.client.Agent().UpdateTTL(instanceID, "online", api.HealthPassing)
+	return r.client.Agent().UpdateTTL(instanceID, "online", api.HealthPassing)
 }

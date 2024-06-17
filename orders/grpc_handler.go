@@ -9,24 +9,23 @@ import (
 )
 
 type grpcHandler struct {
-    pb.UnimplementedOrderServiceServer
+	pb.UnimplementedOrderServiceServer
 
-    service OrdersService
+	service OrdersService
 }
 
 func NewGRPCHandler(grpcServer *grpc.Server, service OrdersService) {
-    handler := &grpcHandler{
-        service: service,
-    }
-    pb.RegisterOrderServiceServer(grpcServer, handler)
+	handler := &grpcHandler{
+		service: service,
+	}
+	pb.RegisterOrderServiceServer(grpcServer, handler)
 }
 
 func (h *grpcHandler) CreateOrder(ctx context.Context, p *pb.CreateOrderRequest) (*pb.Order, error) {
 
-    log.Printf("New order recieved! Order %v", p)
-    o := &pb.Order{
-        ID: "42",
-    }
-    return o, nil
+	log.Printf("New order recieved! Order %v", p)
+	o := &pb.Order{
+		ID: "42",
+	}
+	return o, nil
 }
-
