@@ -36,7 +36,7 @@ func main() {
     go func() {
         for {
             if err := registry.HealthCheck(instanceID, serviceName); err != nil {
-                log.Fatal("failed to health check")
+                log.Fatalf("failed to health check %v", err)
             }
             time.Sleep(time.Second * 1)
         }
@@ -54,6 +54,6 @@ func main() {
     log.Printf("Starting HTTP server at %s", httpAddr)
 
     if err := http.ListenAndServe(httpAddr, mux); err != nil {
-        log.Fatal("Failed to start http server")
+        log.Fatalf("Failed to start http server %v", err)
     }
 }

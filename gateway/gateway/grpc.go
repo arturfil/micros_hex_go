@@ -17,9 +17,9 @@ func NewGRPCGateway(registry discovery.Registry) *gateway {
 }
 
 func (g *gateway) CreateOrder(ctx context.Context, p *pb.CreateOrderRequest) (*pb.Order, error) {
-    conn, err := discovery.ServiceConnectin(ctx, "orders", g.registry)
+    conn, err := discovery.ServiceConnection(ctx, "orders", g.registry)
     if err != nil {
-        log.Fatal("Failed to dial server: %v", err) 
+        log.Fatalf("Failed to dial server: %v", err) 
     }
 
     c := pb.NewOrderServiceClient(conn)

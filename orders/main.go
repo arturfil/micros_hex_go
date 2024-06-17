@@ -14,54 +14,53 @@ import (
 )
 
 var (
-    serviceName = "orders"
-    grpcAddr = common.EnvString("GRPC_ADDR", "localhost:2000")
-    consulAddr = common.EnvString("CONSUL_ADDR", "localhost:8500")
+	serviceName = "orders"
+	grpcAddr    = common.EnvString("GRPC_ADDR", "localhost:2000")
+	consulAddr  = common.EnvString("CONSUL_ADDR", "localhost:8500")
 )
 
 func main() {
 
-    grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer()
 
+	registry, err := consul.NewRegistry(consulAddr, serviceName)
+	if err != nil {
+		panic(err)
+	}
 
-    registry, err := consul.NewRegistry(consulAddr, serviceName)
-    if err != nil {
-        panic(err)
-    }
+	ctx := context.Background()
+	instanceID := discovery.GenerateInstanceID(serviceName)
+	if err := registry.Register(ctx, instanceID, serviceName, grpcAddr); err != nil {
+		panic(err)
+	}
 
-    ctx := context.Background()
-    instanceID := discovery.GenerateInstanceID(serviceName)
-    if err := registry.Register(ctx, instanceID, serviceName, grpcAddr); err != nil {
-        panic(err)
-    }
+	go func() {
+		for {
+			if err := registry.HealthCheck(instanceID, serviceName); err != nil {
+				log.Fatalf("failed to health check %v", err)
+			}
+			time.Sleep(time.Second * 1)
+		}
+	}()
 
-    go func() {
-        for {
-            if err := registry.HealthCheck(instanceID, serviceName); err != nil {
-                log.Fatal("failed to health check")
-            }
-            time.Sleep(time.Second * 1)
-        }
-    }()
+	defer registry.DeRegister(ctx, instanceID, serviceName)
 
-    defer registry.DeRegister(ctx, instanceID, serviceName)
+	l, err := net.Listen("tcp", grpcAddr)
+	if err != nil {
+		log.Fatalf("failed to listen %v", err)
+	}
 
-    l, err := net.Listen("tcp", grpcAddr)
-    if err != nil {
-        log.Fatalf("failed to listen %v", err)
-    }
+	defer l.Close()
 
-    defer l.Close()
+	store := NewStore()
+	svc := NewService(store)
+	NewGRPCHandler(grpcServer, svc)
 
-    store := NewStore()
-    svc := NewService(store)
-    NewGRPCHandler(grpcServer, svc)
+	svc.CreateOrder(context.Background())
 
-    svc.CreateOrder(context.Background())
+	log.Printf("GRPC Server started at %s", grpcAddr)
 
-    log.Printf("GRPC Server started at %s", grpcAddr)
-
-    if err := grpcServer.Serve(l); err != nil {
-        log.Fatal(err.Error())
-    }
+	if err := grpcServer.Serve(l); err != nil {
+		log.Fatal(err.Error())
+	}
 }

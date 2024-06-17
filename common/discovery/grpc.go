@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func ServiceConnectin(ctx context.Context, serviceName string, registry Registry) (*grpc.ClientConn, error) {
+func ServiceConnection(ctx context.Context, serviceName string, registry Registry) (*grpc.ClientConn, error) {
     addrs, err := registry.Discover(ctx, serviceName)
     if err != nil {
         return nil, err
