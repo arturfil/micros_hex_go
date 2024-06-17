@@ -9,7 +9,7 @@ import (
 	"github.com/arturfil/m_gateway/gateway"
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
+	"google.golang.org/grpc/status"
 )
 
 type handler struct {

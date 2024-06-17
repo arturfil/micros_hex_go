@@ -3,14 +3,15 @@ module github.com/arturfil/m_commons
 go 1.21.0
 
 require (
-	google.golang.org/grpc v1.64.0
+	github.com/hashicorp/consul/api v1.29.1
+	google.golang.org/grpc v1.56.3
 	google.golang.org/protobuf v1.34.2
 )
 
 require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/hashicorp/consul/api v1.29.1 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
