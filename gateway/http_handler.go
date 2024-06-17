@@ -6,18 +6,18 @@ import (
 
 	common "github.com/arturfil/m_commons"
 	pb "github.com/arturfil/m_commons/api"
+	"github.com/arturfil/m_gateway/gateway"
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	status "google.golang.org/grpc/status"
 )
 
 type handler struct {
-    // gateway
-    client pb.OrderServiceClient
+    gateway gateway.OrdersGateway
 }
 
-func NewHandler(client pb.OrderServiceClient) *handler {
-    return &handler{client}
+func NewHandler(gateway gateway.OrdersGateway) *handler {
+    return &handler{gateway}
 }
 
 func (h *handler) registerRoutes(mux *chi.Mux) {
@@ -37,7 +37,7 @@ func (h *handler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
         common.WriteError(w, http.StatusBadRequest, err.Error())
     }
 
-    o, err := h.client.CreateOrder(r.Context(), &pb.CreateOrderRequest{
+    o, err := h.gateway.CreateOrder(r.Context(), &pb.CreateOrderRequest{
         CustomerID: customerID,
         Items: items,
     })
