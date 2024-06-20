@@ -27,8 +27,6 @@ var (
 
 func main() {
 
-	grpcServer := grpc.NewServer()
-
 	registry, err := consul.NewRegistry(consulAddr, serviceName)
 	if err != nil {
 		panic(err)
@@ -56,6 +54,12 @@ func main() {
         close()
         ch.Close()
     }()
+
+    svc := NewService()
+    amqpConsumer := NewConsumer(svc)
+    go amqpConsumer.Listen(ch)
+
+	grpcServer := grpc.NewServer()
 
 	l, err := net.Listen("tcp", grpcAddr)
 	if err != nil {

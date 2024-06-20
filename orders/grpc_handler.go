@@ -38,6 +38,9 @@ func (h *grpcHandler) CreateOrder(ctx context.Context, p *pb.CreateOrderRequest)
     }
 
     q, err := h.channel.QueueDeclare(broker.OrderCreatedEvent, true, false, false, false, nil)
+    if err != nil {
+       log.Fatal(err) 
+    }
 
     h.channel.PublishWithContext(ctx, "", q.Name, false, false, amqp.Publishing{
         ContentType: "application/json",

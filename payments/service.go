@@ -14,5 +14,5 @@ func NewService() *service {
 }
 
 func (s *service) CreatePayment(context.Context, *pb.Order) (string, error) {
-    return "", nil
+    return "something", nil
 }
