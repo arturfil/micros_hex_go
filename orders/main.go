@@ -7,6 +7,7 @@ import (
 	"time"
 
 	common "github.com/arturfil/m_commons"
+	"github.com/arturfil/m_commons/broker"
 	"github.com/arturfil/m_commons/discovery"
 	"github.com/arturfil/m_commons/discovery/consul"
 	_ "github.com/joho/godotenv/autoload"
@@ -17,6 +18,10 @@ var (
 	serviceName = "orders"
 	grpcAddr    = common.EnvString("GRPC_ADDR", "localhost:2000")
 	consulAddr  = common.EnvString("CONSUL_ADDR", "localhost:8500")
+	amqpUser    = common.EnvString("RABBITMQ_USER", "guest")
+	amqpPass    = common.EnvString("RABBITMQ_PASS", "guest")
+	amqpHost    = common.EnvString("RABBITMQ_HOST", "localhost")
+	amqpPort    = common.EnvString("RABBITMQ_PORT", "5672")
 )
 
 func main() {
@@ -45,6 +50,12 @@ func main() {
 
 	defer registry.DeRegister(ctx, instanceID, serviceName)
 
+	ch, close := broker.Connect(amqpUser, amqpPass, amqpHost, amqpPort)
+    defer func() {
+        close()
+        ch.Close()
+    }()
+
 	l, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
 		log.Fatalf("failed to listen %v", err)
@@ -54,7 +65,7 @@ func main() {
 
 	store := NewStore()
 	svc := NewService(store)
-	NewGRPCHandler(grpcServer, svc)
+	NewGRPCHandler(grpcServer, svc, ch)
 
 	svc.CreateOrder(context.Background())
 

@@ -1,2 +1,2 @@
-start.consul:
+up:
 	docker-compose up
