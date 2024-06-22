@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -7,11 +6,14 @@ import (
 	"net"
 	"time"
 
+    stripeProcessor "github.com/arturfil/m_payments/processor/stripe"
+
 	common "github.com/arturfil/m_commons"
 	"github.com/arturfil/m_commons/broker"
 	"github.com/arturfil/m_commons/discovery"
 	"github.com/arturfil/m_commons/discovery/consul"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/stripe/stripe-go/v78"
 	"google.golang.org/grpc"
 )
 
@@ -23,6 +25,7 @@ var (
 	amqpPort    = common.EnvString("RABBITMQ_PORT", "5672")
 	grpcAddr    = common.EnvString("GRPC_ADDR", "localhost:2001")
 	consulAddr  = common.EnvString("CONSUL_ADDR", "localhost:8500")
+	stripeKey   = common.EnvString("STRIPE_KEY", "")
 )
 
 func main() {
@@ -49,15 +52,19 @@ func main() {
 
 	defer registry.DeRegister(ctx, instanceID, serviceName)
 
-	ch, close := broker.Connect(amqpUser, amqpPass, amqpHost, amqpPort)
-    defer func() {
-        close()
-        ch.Close()
-    }()
+	stripe.Key = stripeKey
 
-    svc := NewService()
-    amqpConsumer := NewConsumer(svc)
-    go amqpConsumer.Listen(ch)
+	ch, close := broker.Connect(amqpUser, amqpPass, amqpHost, amqpPort)
+	defer func() {
+		close()
+		ch.Close()
+	}()
+
+    stripeProcessor := stripeProcessor.NewStripeProcessor()
+	svc := NewService(stripeProcessor)
+
+	amqpConsumer := NewConsumer(svc)
+	go amqpConsumer.Listen(ch)
 
 	grpcServer := grpc.NewServer()
 
