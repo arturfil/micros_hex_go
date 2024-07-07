@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	common "github.com/arturfil/m_commons"
 	pb "github.com/arturfil/m_commons/api"
@@ -20,8 +23,54 @@ func NewHandler(gateway gateway.OrdersGateway) *handler {
 	return &handler{gateway}
 }
 
-func (h *handler) registerRoutes(mux *chi.Mux) {
-	mux.Post("/api/v1/customers/{customerID}/orders", h.HandleCreateOrder)
+func (h *handler) registerRoutes(router *chi.Mux) {
+    // static folder serving
+    workDir, _ :=  os.Getwd()
+    filesDir := http.Dir(filepath.Join(workDir, "public"))
+    FileServer(router, "/", filesDir)
+
+	router.Post("/api/v1/customers/{customerID}/orders", h.HandleCreateOrder)
+    router.Get("/api/v1/customers/{customerID}/orders/{orderID}", h.HandleGetOrder)
+
+}
+
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit any URL parameters.")
+	}
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
+}
+
+func (h *handler) HandleGetOrder(w http.ResponseWriter, r *http.Request) {
+    customerID := chi.URLParam(r, "customerID")
+    orderID := chi.URLParam(r, "orderID")
+
+    o, err := h.gateway.GetOrder(r.Context(), orderID, customerID)
+    rStatus := status.Convert(err)
+
+	if rStatus != nil {
+		if rStatus.Code() != codes.InvalidArgument {
+			common.WriteError(w, http.StatusBadRequest, rStatus.Message())
+			return
+		}
+
+		common.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+    common.WriteJSON(w, http.StatusOK, o)
 }
 
 func (h *handler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {

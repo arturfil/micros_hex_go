@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="/style.css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <section>
+      <p>Your order has been placed successfully!</p>
+
+      <p>Order Status: <span id="orderStatus">Pending...</span></p>
+
+      <div class="ready-popup">
+        <p>Your order is ready for pickup!</p>
+
+        <p>
+          Order number <b>#<span id="orderID"></span> </b>
+        </p>
+
+        <button
+          class="close-btn"
+          onclick="document.querySelector('.ready-popup').style.display = 'none'"
+        >
+          Close
+        </button>
+      </div>
+
+      <div class="payment-popup">
+        <p>Waiting payment...</p>
+
+        <a href="#" id="payment-link">Go to Payment</a>
+      </div>
+
+    </section>
+  </body>
+
+  <script>
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerID = urlParams.get("customerID");
+    const orderID = urlParams.get("orderId");
+    
+    const order = {
+        customerID,
+        orderID,
+        status: "pending"
+    };
+
+    const poolOrderStatus = async () => {
+        const response = await fetch('/api/v1/customers/${customerID}/orders/${orderID}');
+
+        const data = await response.json();
+
+        if (data.Status === "waiting_payment") {
+            order.Status = "Your order is waiting for payment...";
+            document.getElementById("orderStatus").innerText = order.Status;
+
+            document.querySelector(".payment-popup").style.display = "block";
+            document.getElementById("payment-link").href = data.PaymentLink;
+
+        }
+
+        if (data.Status === "paid") {
+            order.Status = "Your order has been paid for. Please wait while its being processed..."
+            document.getElementById("orderStatus").innerText = order.Status;
+
+            setTimeout(poolOrderStatus, 5000);
+
+        } else if (data.Status === "ready") {
+            order.Status = "ready"
+
+            document.querySelector(".payment-popup").style.display = "block"
+            document.getElementById("orderID").innerText = orderID;
+            document.getElementById("orderStatus").innerText = order.Status;
+        } else {
+
+            setTimeout(poolOrderStatus, 5000);
+        }
+    };
+
+    poolOrderStatus();
+
+  </script>
+
+</html>

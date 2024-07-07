@@ -1,0 +1,75 @@
+html {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    background-color: wheat;
+    color: #333333;
+  }
+
+  section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .ready-popup {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 2px solid green;
+    border-radius: 5px;
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .payment-popup {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 2px solid green;
+    border-radius: 5px;
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .payment-popup a {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: green;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+
+  .ready-popup p {
+    margin: 0;
+  }
+
+  .close-btn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+  }
